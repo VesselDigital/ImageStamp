@@ -8,4 +8,3 @@
 
 **Notes**
 First release version of the plugin.
-Only includes text watermarking currently.
