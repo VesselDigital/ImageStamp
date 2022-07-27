@@ -151,17 +151,28 @@ class Stamper
      * @param resouce|\GDImage $image
      * @param string $text
      * @param string $position
+     * @param $opacity
      * @param float $width
      * @param float $height
      * @return void
      */
-    private function _text($image, string $text, string $position, $width, $height)
+    private function _text($image, string $text, string $position, $opacity, $width, $height)
     {
         if (!in_array($position, $this->valid_positions)) {
             return;
         }
 
-        $white = imagecolorallocate($image, 255, 255, 255);
+        if(is_numeric($opacity)) { // Opacity is numeric?
+            // Get the value from the percentage
+            $val = ((float) $opacity / 100) * 127;
+            // Because 127 is transparent we need the inverse value so we take 127 from the value to inverse it.
+            $alpha = 127 - $val;
+        } else { 
+            // Make it fully visible
+            $alpha = 0;
+        }
+
+        $white = imagecolorallocatealpha($image, 255, 255, 255, $alpha);
         // Landscape
         if ($width != 0 && $height != 0) {
             if ($width > $height) {
@@ -282,7 +293,8 @@ class Stamper
 
         $img = $mimes[$mime_type]["create"]($input_path);
         $text = $settings["text"];
-        $this->_text($img, $text, $settings["position"], imagesx($img), imagesy($img));
+        $opacity = $settings["opacity"];
+        $this->_text($img, $text, $settings["position"], $opacity, imagesx($img), imagesy($img));
         if ($mimes[$mime_type]["save"]($img, $output_path)) {
             imagedestroy($img);
             return true;

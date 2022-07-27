@@ -19,6 +19,13 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th>Watermark Opacity</th>
+                                <td>
+                                    <input type="range" name="watermark-opacity" min="0" max="100" value="<?php echo esc_attr($opacity * 100); ?>" id="watermark-opacity-slider" />
+                                    <input type="text" id="watermark-opacity-value" placeholder="100" value="<?php echo esc_attr($opacity * 100); ?>%" />
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>Watermark Position</th>
                                 <td>
                                     <fieldset>

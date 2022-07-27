@@ -42,6 +42,7 @@ class PluginSettings extends Page
         $settings = $imagestamp->get_settings();
         $position = $settings["position"];
         $text = $settings["text"];
+        $opacity = $settings["opacity"];
 
         include_once IMAGE_STAMP_PATH . "/templates/pages/settings.php";
     }
