@@ -164,7 +164,7 @@ class Stamper
 
         if(is_numeric($opacity)) { // Opacity is numeric?
             // Get the value from the percentage
-            $val = ((float) $opacity / 100) * 127;
+            $val = (float) $opacity * 127;
             // Because 127 is transparent we need the inverse value so we take 127 from the value to inverse it.
             $alpha = 127 - $val;
         } else { 
