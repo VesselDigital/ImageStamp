@@ -45,9 +45,18 @@ class SaveSettings extends Action
                 $opacity = $opacity_data / 100;
             }
         }
+
+        $angle = 0;
+        if(isset($this->data["watermark-angle"]) && is_numeric($this->data["watermark-angle"])) {
+            $angle_data = $this->data["watermark-angle"];
+            if( $angle_data >= -360 && $opacity_data <= 360) {
+                $angle = $angle_data;
+            }
+        }
         update_option("imagestamp_watermark_position", $position);
         update_option("imagestamp_watermark_text", $watermark);
         update_option("imagestamp_watermark_opacity", $opacity);
+        update_option("imagestamp_watermark_angle", $angle);
 
         return $this->redirect( $this->base_url . '&message=success' );
     }

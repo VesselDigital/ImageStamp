@@ -165,12 +165,14 @@ if(!class_exists("ImageStamp")) {
         public function get_settings() {
             $position = get_option("imagestamp_watermark_position", "center");
             $opacity = get_option("imagestamp_watermark_opacity", "1");
+            $angle = get_option("imagestamp_watermark_angle", "0");
             $text = get_option("imagestamp_watermark_text", get_bloginfo("title"));
 
             return [
                 "position" => $position,
                 "text" => $text,
-                "opacity" => $opacity
+                "opacity" => $opacity,
+                "angle" => $angle,
             ];
         }
 

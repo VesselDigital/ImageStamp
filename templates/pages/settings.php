@@ -26,6 +26,13 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th>Watermark Angle</th>
+                                <td>
+                                    <input type="range" name="watermark-angle" min="0" max="360" value="<?php echo $angle; ?>" id="watermark-angle-slider" />
+                                    <input type="text" id="watermark-angle-value" placeholder="0°" value="<?php echo $angle; ?>°" />
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>Watermark Position</th>
                                 <td>
                                     <fieldset>

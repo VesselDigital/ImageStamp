@@ -152,11 +152,12 @@ class Stamper
      * @param string $text
      * @param string $position
      * @param $opacity
+     * @param $angle
      * @param float $width
      * @param float $height
      * @return void
      */
-    private function _text($image, string $text, string $position, $opacity, $width, $height)
+    private function _text($image, string $text, string $position, $opacity, $angle, $width, $height)
     {
         if (!in_array($position, $this->valid_positions)) {
             return;
@@ -164,7 +165,7 @@ class Stamper
 
         if(is_numeric($opacity)) { // Opacity is numeric?
             // Get the value from the percentage
-            $val = ((float) $opacity / 100) * 127;
+            $val = (float) $opacity * 127;
             // Because 127 is transparent we need the inverse value so we take 127 from the value to inverse it.
             $alpha = 127 - $val;
         } else { 
@@ -190,7 +191,7 @@ class Stamper
         $x = $xy["x"];
         $y = $xy["y"];
 
-        imagettftext($image, $font_size, 0, $x, $y, $white, $this->font_path, $text);
+        return imagettftext($image, $font_size, $angle, $x, $y, $white, $this->font_path, $text);
     }
 
     /**
@@ -294,7 +295,9 @@ class Stamper
         $img = $mimes[$mime_type]["create"]($input_path);
         $text = $settings["text"];
         $opacity = $settings["opacity"];
-        $this->_text($img, $text, $settings["position"], $opacity, imagesx($img), imagesy($img));
+        $angle = $settings["angle"];
+
+        $this->_text($img, $text, $settings["position"], $opacity, $angle, imagesx($img), imagesy($img));
         if ($mimes[$mime_type]["save"]($img, $output_path)) {
             imagedestroy($img);
             return true;
