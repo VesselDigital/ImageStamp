@@ -26,6 +26,7 @@
 if(!class_exists("ImageStamp")) {
 
     define("IMAGE_STAMP_PATH", plugin_dir_path(__FILE__));
+    define("IMAGE_STAMP_URL", plugin_dir_url(__FILE__));
     define("IMAGE_STAMP_UPLOADS_URL", wp_upload_dir()["baseurl"] . "/imagestamp");
     define("IMAGE_STAMP_UPLOADS", wp_upload_dir()["basedir"] . "/imagestamp");
     define("IMAGE_STAMP_UPLOADS_CACHE_URL", wp_upload_dir()["baseurl"] . "/imagestamp/cache");
@@ -75,6 +76,8 @@ if(!class_exists("ImageStamp")) {
 
             $this->stamper = new \ImageStamp\Helpers\Stamper;
             $this->fetcher = new \ImageStamp\Helpers\Fetcher;
+
+            add_action("admin_enqueue_scripts", [ $this, "enqueue_admin_scripts" ]);
         }
 
 
@@ -161,12 +164,23 @@ if(!class_exists("ImageStamp")) {
          */
         public function get_settings() {
             $position = get_option("imagestamp_watermark_position", "center");
+            $opacity = get_option("imagestamp_watermark_opacity", "1");
             $text = get_option("imagestamp_watermark_text", get_bloginfo("title"));
 
             return [
                 "position" => $position,
-                "text" => $text
+                "text" => $text,
+                "opacity" => $opacity
             ];
+        }
+
+        /**
+         * Load admin scripts
+         * 
+         * @return void
+         */
+        public function enqueue_admin_scripts() {
+            wp_enqueue_script("imagestamp-settings", IMAGE_STAMP_URL . "/assets/settings.js", [ "jquery" ], 1);
         }
 
         /**

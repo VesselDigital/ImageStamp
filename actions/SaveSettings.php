@@ -38,8 +38,16 @@ class SaveSettings extends Action
             $watermark = esc_html( $this->data["watermark-text"] );
         }
 
+        $opacity = 1;
+        if(isset($this->data["watermark-opacity"]) && is_numeric($this->data["watermark-opacity"])) {
+            $opacity_data = (float) $this->data["watermark-opacity"];
+            if( $opacity_data >= 0 && $opacity_data <= 100) {
+                $opacity = $opacity_data / 100;
+            }
+        }
         update_option("imagestamp_watermark_position", $position);
         update_option("imagestamp_watermark_text", $watermark);
+        update_option("imagestamp_watermark_opacity", $opacity);
 
         return $this->redirect( $this->base_url . '&message=success' );
     }
