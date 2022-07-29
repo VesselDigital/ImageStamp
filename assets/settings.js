@@ -47,4 +47,29 @@ jQuery(document).ready(function() {
         e.preventDefault();
     })
 
+    jQuery(".remove-watermark-image").click(function(e) {
+
+        jQuery(".button").prop("disabled", true);
+        jQuery(e.target).text("Removing...");
+
+        jQuery.ajax({
+            url: "admin-ajax.php",
+            method: "post",
+            data: {
+                action: "imagestamp_remove_overlay_image",
+                _wpnonce: jQuery("input[name='_watermark_nonce']").val()
+            }
+        }).done(function(data) {
+            jQuery(".button").prop("disabled", false);
+            jQuery(e.target).remove();
+            jQuery(".watermark-preview").attr("src", "").hide();
+        })
+        .error(function() {
+            jQuery(".button").prop("disabled", false);
+            jQuery(e.target).text("Remove Image");
+        })
+
+        e.preventDefault();
+    })
+
 });

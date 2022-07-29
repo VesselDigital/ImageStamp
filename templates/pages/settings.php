@@ -7,9 +7,10 @@
                 <h2 class="hndle ui-sortable-handle is-non-sortable"><?php echo __("Watermark Settings", "image-stamp"); ?></h2>
             </div>
             <div class="inside">
-                <form action="admin-post.php" method="POST">
+                <form action="admin-post.php" id="imagestamp-settings" method="POST">
                     <input type="hidden" name="action" value="imagestamp_save_settings" />
                     <?php $action->get_form(true); ?>
+                    <?php echo $remove_watermark_action->get_nonce_field("_watermark_nonce"); ?>
                     <input type="hidden" name="watermark-image" value="<?php echo $image ? esc_attr($image) : ''; ?>"/>
                     <table class="form-table">
                         <tbody>

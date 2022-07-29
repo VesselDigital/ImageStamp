@@ -42,6 +42,7 @@ class PluginSettings extends Page
         wp_enqueue_media();
 
         $action = $imagestamp->action("save_settings");
+        $remove_watermark_action = $imagestamp->action("remove_overlay_image");
         
         $settings = $imagestamp->get_settings();
         $position = $settings["position"];
