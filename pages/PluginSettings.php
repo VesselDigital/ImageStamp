@@ -37,11 +37,16 @@ class PluginSettings extends Page
     public function render()
     {
         global $imagestamp;
+
+        wp_enqueue_script("jquery");
+        wp_enqueue_media();
+
         $action = $imagestamp->action("save_settings");
         
         $settings = $imagestamp->get_settings();
         $position = $settings["position"];
         $text = $settings["text"];
+        $image = $settings["image"];
         $opacity = $settings["opacity"];
 
         include_once IMAGE_STAMP_PATH . "/templates/pages/settings.php";

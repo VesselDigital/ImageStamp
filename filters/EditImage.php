@@ -21,7 +21,7 @@ class EditImage {
     public function handle($form_fields, $post = null) {
         global $imagestamp;
 
-        if(!in_array($post->post_mime_type, $this->exclusions)) {
+        if(!in_array($post->post_mime_type, $this->exclusions) && $post->ID != $imagestamp->get_settings()["image"]) {
             $checked = (get_post_meta($post->ID, "_imagestamp_exclude_watermark", true) == "1");
 
             $exclude_watermark_field = [

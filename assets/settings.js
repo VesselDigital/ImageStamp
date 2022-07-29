@@ -3,6 +3,7 @@ jQuery(document).ready(function() {
     var opacitySlider = jQuery("#watermark-opacity-slider");
     var opacityValue = jQuery("#watermark-opacity-value");
 
+
     opacitySlider.on("change", function(e) {
         if(!isNaN(parseFloat(e.target.value))) {
             var opacity = parseFloat(e.target.value);
@@ -20,5 +21,30 @@ jQuery(document).ready(function() {
             }
         }
     });
+
+    var watermarkPreview = jQuery(".watermark-preview");
+    if(watermarkPreview.length > 0) {
+        watermarkPreview.on("load", function() {
+            jQuery(this).show();
+        })
+    }
+    jQuery(".attach-watermark-image").click(function(e) {
+
+        var imagePopup = wp.media({ 
+            title: 'Upload Image',
+            button: {
+              text: 'Use as watermark'
+            },
+            multiple: false
+        }).open()
+        .on('select', function(){
+            var image = imagePopup.state().get('selection').first().toJSON();
+            watermarkPreview.attr("src", image.url).attr("alt", image.alt);
+            jQuery("input[name='watermark-image']").val(image.id);
+            jQuery(".attach-watermark-image").text("Replace Image");
+        });
+
+        e.preventDefault();
+    })
 
 });
