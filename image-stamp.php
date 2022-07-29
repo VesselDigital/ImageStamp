@@ -63,6 +63,13 @@ if(!class_exists("ImageStamp")) {
         public $fetcher;
 
         /**
+         * Image stamper version
+         * 
+         * @var float
+         */
+        protected $ver = 1;
+
+        /**
          * On loading of the plugin
          * 
          * @return \ImageStamp
@@ -78,6 +85,8 @@ if(!class_exists("ImageStamp")) {
             $this->fetcher = new \ImageStamp\Helpers\Fetcher;
 
             add_action("admin_enqueue_scripts", [ $this, "enqueue_admin_scripts" ]);
+            add_action("admin_enqueue_scripts", [ $this, "enqueue_admin_css" ]);
+            
         }
 
 
@@ -180,12 +189,24 @@ if(!class_exists("ImageStamp")) {
         }
 
         /**
+         * Load admin css
+         * 
+         * @return void
+         */
+        public function enqueue_admin_css() {
+            wp_enqueue_style("imagestamp-settings", IMAGE_STAMP_URL . "/assets/css/settings.css", [ ], $this->ver);
+        }
+
+        /**
          * Load admin scripts
          * 
          * @return void
          */
         public function enqueue_admin_scripts() {
-            wp_enqueue_script("imagestamp-settings", IMAGE_STAMP_URL . "/assets/settings.js", [ "jquery" ], 1);
+            wp_enqueue_script("imagestamp-settings", IMAGE_STAMP_URL . "/assets/js/settings.js", [ "jquery" ], $this->ver);
+            wp_localize_script("imagestamp-settings", "imgsopts", [
+                "preview_url" => IMAGE_STAMP_URL . "/assets/img/butterfly.jpg"
+            ]);
         }
 
         /**

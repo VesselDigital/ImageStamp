@@ -1,0 +1,113 @@
+#imagestamper .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: -20px;
+    padding: 20px;
+    background-color: #fff;
+
+    margin-bottom: 25px;
+}
+
+#imagestamper .header h2{
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+#imagestamper .btn {
+    background-color: #d3d3d3;
+    border-radius: 50px;
+    padding: 5px 15px;
+    font-weight: 500;
+    border: 0;
+    cursor: pointer;
+
+    transition: 250ms ease background-color;
+}
+
+#imagestamper .btn:hover {
+    background-color: #afafaf;
+}
+#imagestamper .btn:focus {
+    outline: 0;
+}
+
+#imagestamper .button.save {
+    background-color: #2271b1;
+    color: #fff;
+}
+#imagestamper .button.danger {
+    background-color: #f53e3e;
+    border-color: #f53e3e;
+    color: #fff;
+}
+#imagestamper .button.danger:hover {
+    background-color: #f53e3e;
+}
+
+#imagestamper .row {
+    display: flex;
+    margin-left: -20px;
+    margin-right: -20px;
+}
+#imagestamper .row .col-6 {
+    box-sizing: border-box;
+    flex: 0 0 50%;
+    padding: 0 20px;
+    min-width: none;
+}
+
+#imagestamper .form-field {
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+#imagestamper .form-field label {
+    display: block;
+    font-weight: bold;
+    flex-shrink: 0;
+    padding-right: 10px;
+    width: 30%;
+}
+#imagestamper .form-field .form-control {
+    padding-left: 10px;
+    width: 70%;
+}
+
+#imagestamper .watermark-preview {
+    margin: 0 0 15px 0;
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+}
+
+#imagestamper .postbox .legal {
+    display: block;
+    color: #afafaf;
+    margin-top: 25px;
+}
+
+#imagestamper .postbox .preview-container {
+    width: 100%;
+}
+
+
+#imagestamper #poststuff, #imagestamper .postbox {
+    min-width: unset;
+}
+
+
+@media (max-width: 1024px) {
+    #imagestamper .row {
+        display: block;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    #imagestamper .row .col-6 {
+        padding: 20px 0;
+        flex: 0 0 100%;
+    }
+}
