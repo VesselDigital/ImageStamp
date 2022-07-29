@@ -7,15 +7,27 @@
                 <h2 class="hndle ui-sortable-handle is-non-sortable"><?php echo __("Watermark Settings", "image-stamp"); ?></h2>
             </div>
             <div class="inside">
-                <form action="admin-post.php" method="POST">
+                <form action="admin-post.php" id="imagestamp-settings" method="POST">
                     <input type="hidden" name="action" value="imagestamp_save_settings" />
                     <?php $action->get_form(true); ?>
+                    <?php echo $remove_watermark_action->get_nonce_field("_watermark_nonce"); ?>
+                    <input type="hidden" name="watermark-image" value="<?php echo $image ? esc_attr($image) : ''; ?>"/>
                     <table class="form-table">
                         <tbody>
                             <tr>
                                 <th>Watermark Text</th>
                                 <td>
                                     <input type="text" name="watermark-text" placeholder="<?php echo esc_attr(get_bloginfo('title')); ?>" value="<?php echo esc_attr($text); ?>" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Watermark Image</th>
+                                <td>
+                                    <img src="<?php echo $image ? wp_get_attachment_image_url($image, "original", false) : ''; ?>" class="watermark-preview" style="display: <?php echo $image ? "block" : "none"; ?>;" alt=""/>
+                                    <button type="button" class="button attach-watermark-image">Attach Image</button>
+                                    <?php if($image != false) : ?>
+                                        <button type="button" class="button danger remove-watermark-image">Remove Image</button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <tr>

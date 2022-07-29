@@ -31,6 +31,27 @@ class Stamper
 
 
     /**
+     * Image Mime Function Maps
+     * 
+     * @var array
+     */
+    protected $mimes = [
+        "image/jpeg" => [
+            "create" => "imagecreatefromjpeg",
+            "save" => "imagejpeg"
+        ],
+        "image/png" => [
+            "create" => "imagecreatefrompng",
+            "save" => "imagepng"
+        ],
+        "image/webp" => [
+            "create" => "imagecreatefromwebp",
+            "save" => "imagewebp"
+        ]
+    ];
+
+
+    /**
      * New stamper instance
      * 
      * @return void
@@ -90,10 +111,6 @@ class Stamper
             return false;
         }
 
-        global $imagestamp;
-        $settings = $imagestamp->get_settings();
-
-
         $ext = pathinfo($paths[$sizes[0]], PATHINFO_EXTENSION);
 
         foreach ($paths as $size => $path) {
@@ -107,8 +124,7 @@ class Stamper
                 $status = $this->_generate_image(
                     $path,
                     $output_path,
-                    $post->post_mime_type,
-                    $settings
+                    $post->post_mime_type
                 );
             }
 
@@ -149,6 +165,178 @@ class Stamper
      * Calculate images text position and size
      * 
      * @param resouce|\GDImage $image
+     * @param integer $image_id
+     * @param string $position
+     * @param $opacity
+     * @param float $width
+     * @param float $height
+     * @return \GDImage
+     */
+    private function _overlay_image($image, $image_id, string $position, $opacity, $width, $height)
+    {
+        $post = get_post($image_id);
+        $overlay_mime_type = $post->post_mime_type;
+        if(!isset($this->mimes[$overlay_mime_type])) {
+            return false;
+        }
+        $overlay_image_path = $this->_url_to_path($post->guid);
+        $overlay_image = $this->mimes[$overlay_mime_type]["create"]($overlay_image_path);
+
+        if($overlay_image === false) {
+            throw new \Error("Failed to open overlay image, please check file permissions");
+        }
+        
+        // Resize the watermark to fit the image
+        $overlay_width = $width / 2;
+        $overlay_height = $height / 2;
+        $overlay_image_data = $this->_resize_image($overlay_image, $overlay_width, $overlay_height);
+        
+        $overlay_image = $overlay_image_data["image"];
+        $overlay_width = $overlay_image_data["width"];
+        $overlay_height = $overlay_image_data["height"];
+
+
+        if(is_numeric($opacity)) { // Opacity is numeric?
+            // Get the value from the percentage
+            $val = 1 - (float) $opacity;
+            // Because 127 is transparent we need the inverse value so we take 127 from the value to inverse it.
+            $alpha = $val * 127;
+        } else { 
+            // Make it fully visible
+            $alpha = 0;
+        }
+
+        // Opacity of the overlay / watermark
+        imagefilter($overlay_image, IMG_FILTER_COLORIZE, 0, 0, 0, $alpha);
+
+
+        // Add old image to a new true color image
+        $new_image = imagecreatetruecolor($width, $height);
+        imagecopy($new_image, $image, 0, 0, 0, 0, $width, $height);
+        imagedestroy($image);
+
+        // Put the watermark on the image
+        $overlay_pos = $this->_image_xy($overlay_width, $overlay_height, $width, $height, $position);
+        imagecopy($new_image, $overlay_image, $overlay_pos["x"], $overlay_pos["y"], 0, 0, $overlay_width, $overlay_height);
+        imagedestroy($overlay_image);
+
+        return $new_image;
+    }
+
+    /**
+     * Resize an image
+     * 
+     * @param \GDImage $image
+     * @param int $new_width
+     * @param int $new_height
+     * @param boolean $maintain_aspect
+     * @return array
+     */
+    private function _resize_image($image, $new_width, $new_height, $maintain_aspect = true) {
+        $old_width = imagesx($image);
+        $old_height = imagesy($image);
+
+        // Maintaining aspect ratio
+        if($maintain_aspect) {
+            // Calculate existing ratio
+            $ratio = $old_width / $old_height;
+            if($new_width / $new_height > $ratio) {
+                $new_width = $new_height * $ratio;
+            } else {
+                $new_height = $new_width / $ratio;
+            }
+        }
+
+        $new_image = imagecreatetruecolor($new_width, $new_height);
+        imagealphablending( $new_image, false );
+        imagesavealpha( $new_image, true );
+        imagecopyresampled($new_image, $image, 0, 0, 0, 0, $new_width, $new_height, $old_width, $old_height);
+        imagedestroy($image);
+
+        return [
+            "image" => $new_image,
+            "width" => $new_width,
+            "height" => $new_height
+        ];
+    }
+
+    /**
+     * Calculate the x and y position
+     * 
+     * @param float $overlay_width
+     * @param float $overlay_height
+     * @param float $image_width
+     * @param float $image_height
+     * @param string $position
+     * 
+     * @return array
+     */
+    private function _image_xy($overlay_width, $overlay_height, $image_width, $image_height, $position)
+    {
+        $x = 0;
+
+        $left = 0;
+        $bottom = $overlay_height;
+        $right = $overlay_width + $overlay_height;
+        $top = $overlay_width;
+
+        $xCenter = $image_width / 2;
+        $yCenter = $image_height / 2;
+
+        $xOffset = ($right - $left) / 2;
+        $yOffset = ($bottom - $top) / 2;
+
+        $size = 24;
+
+        switch ($position) {
+
+            case "top-left":
+                $x = $size;
+                $y = $size + 10;
+                break;
+            case "top-center":
+                $x = $xCenter - $xOffset;
+                $y = $size + 10;
+                break;
+            case "top-right":
+                $x = ($image_width - $right) - 10;
+                $y = $size + 10;
+                break;
+
+            case "left":
+                $x = $size;
+                $y = ($image_height / 2) - $size;
+                break;
+            case "center":
+                $x = $xCenter - $xOffset;
+                $y = $yCenter + $yOffset;
+                break;
+            case "right":
+                $x = ($image_width - $right) - 10;
+                $y = ($image_height / 2) - $size;
+                break;
+
+            case "bottom-left":
+                $x = $size;
+                $y = ($image_height - 10) - ($overlay_height + $size);
+                break;
+            case "bottom-center":
+                $x = $xCenter - $xOffset;
+                $y = ($image_height - 10) - ($overlay_height + $size);
+                break;
+            case "bottom-right":
+                $x = ($image_width - $right) - 10;
+                $y = ($image_height - 10) - ($overlay_height + $size);
+                break;
+        }
+
+        return ["x" => $x, "y" => $y];
+    }
+
+    /**
+     * Calculate images text position and size
+     * 
+     * @param resouce|\GDImage $image
      * @param string $text
      * @param string $position
      * @param $opacity
@@ -164,9 +352,9 @@ class Stamper
 
         if(is_numeric($opacity)) { // Opacity is numeric?
             // Get the value from the percentage
-            $val = (float) $opacity * 127;
+            $val = 1 - (float) $opacity;
             // Because 127 is transparent we need the inverse value so we take 127 from the value to inverse it.
-            $alpha = 127 - $val;
+            $alpha = $val * 127;
         } else { 
             // Make it fully visible
             $alpha = 0;
@@ -186,7 +374,7 @@ class Stamper
 
         // 16 is the base font height.
         $font_size = 16 * $mutliplier;
-        $xy = $this->_xy($text, $font_size, $width, $height, $position);
+        $xy = $this->_text_xy($text, $font_size, $width, $height, $position);
         $x = $xy["x"];
         $y = $xy["y"];
 
@@ -204,7 +392,7 @@ class Stamper
      * 
      * @return array
      */
-    private function _xy($text, $font_size, $width, $height, $position)
+    private function _text_xy($text, $font_size, $width, $height, $position)
     {
         $x = 0;
         $y = $font_size;
@@ -267,35 +455,35 @@ class Stamper
      * @param string $input_path
      * @param string $output_path
      * @param string $mime_type
-     * @param array $settings
      * 
      * @return boolean
      */
-    private function _generate_image(string $input_path, string $output_path, string $mime_type, array $settings = ['position' => 'center', 'text' => 'watermark'])
+    private function _generate_image(string $input_path, string $output_path, string $mime_type)
     {
-        $mimes = [
-            "image/jpeg" => [
-                "create" => "imagecreatefromjpeg",
-                "save" => "imagejpeg"
-            ],
-            "image/png" => [
-                "create" => "imagecreatefrompng",
-                "save" => "imagepng"
-            ],
-            "image/webp" => [
-                "create" => "imagecreatefromwebp",
-                "save" => "imagewebp"
-            ]
-        ];
-        if(!isset($mimes[$mime_type])) {
+        global $imagestamp;
+        $settings = $imagestamp->get_settings();
+
+        if(!isset($this->mimes[$mime_type])) {
             return false;
         }
 
-        $img = $mimes[$mime_type]["create"]($input_path);
+        $img = $this->mimes[$mime_type]["create"]($input_path);
+
+        if($img === false) {
+            throw new \Error("Failed to open base image, please check file permissions");
+        }
+
         $text = $settings["text"];
         $opacity = $settings["opacity"];
-        $this->_text($img, $text, $settings["position"], $opacity, imagesx($img), imagesy($img));
-        if ($mimes[$mime_type]["save"]($img, $output_path)) {
+
+        if($settings["image"] != false) {
+            $img = $this->_overlay_image($img, $settings["image"], $settings["position"], $opacity, imagesx($img), imagesy($img));
+        } else {
+            $this->_text($img, $text, $settings["position"], $opacity, imagesx($img), imagesy($img));
+        }
+
+
+        if ($this->mimes[$mime_type]["save"]($img, $output_path)) {
             imagedestroy($img);
             return true;
         }

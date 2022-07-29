@@ -93,6 +93,7 @@ if(!class_exists("ImageStamp")) {
             include_once "actions/Action.php";
             include_once "actions/SaveSettings.php";
             include_once "actions/DeleteAttachment.php";
+            include_once "actions/RemoveOverlayImage.php";
 
             include_once "filters/EditImage.php";
             include_once "filters/SaveImage.php";
@@ -122,6 +123,7 @@ if(!class_exists("ImageStamp")) {
         private function register_actions() {
             $this->actions["save_settings"] = new \ImageStamp\Actions\SaveSettings;
             $this->actions["delete_image"] = new \ImageStamp\Actions\DeleteAttachment;
+            $this->actions["remove_overlay_image"] = new \ImageStamp\Actions\RemoveOverlayImage;
 
             return $this;
         }
@@ -165,11 +167,14 @@ if(!class_exists("ImageStamp")) {
         public function get_settings() {
             $position = get_option("imagestamp_watermark_position", "center");
             $opacity = get_option("imagestamp_watermark_opacity", "1");
+            $image = get_option("imagestamp_watermark_image", false);
             $text = get_option("imagestamp_watermark_text", get_bloginfo("title"));
 
+        
             return [
                 "position" => $position,
                 "text" => $text,
+                "image" => $image,
                 "opacity" => $opacity
             ];
         }

@@ -35,6 +35,13 @@ class Action
      */
     public $is_native = false;
 
+    /**
+     * Is an ajax action?
+     * 
+     * @var boolean
+     */
+    public $is_ajax = false;
+
 
     /**
      * On new action created
@@ -42,9 +49,11 @@ class Action
      * @return void
      */
     public function __construct()
-    {
+    { 
         if($this->is_native) {
             add_action($this->action, array($this, 'handle'));
+        } if($this->is_ajax) {
+            add_action( 'wp_ajax_imagestamp_' . $this->action, [$this, '_handle'] );
         } else {
             add_action( 'admin_post_imagestamp_' . $this->action, [$this, '_handle'] );
         }
@@ -59,12 +68,20 @@ class Action
         $nonce = $_REQUEST["_wpnonce"];
 
         if ( ! wp_verify_nonce( $nonce, $this->action ) ) {
-            $this->redirect( $this->base_url . '&error=nonce' );
+            if($this->is_ajax) {
+                wp_send_json_error([ "message" => "Invalid token" ]);
+            } else {
+                $this->redirect( $this->base_url . '&error=nonce' );
+            }
             return;
         }
 
         if ( ! current_user_can( 'manage_options' ) ) {
-            $this->redirect( $this->base_url . '&error=permission' );
+            if($this->is_ajax) {
+                wp_send_json_error([ "message" => "You don't have permission to access this" ]);
+            } else {
+                $this->redirect( $this->base_url . '&error=permission' );
+            }
             return;
         }
 
@@ -90,7 +107,7 @@ class Action
      * @return string|void
      */
     public function get_form($echo = false) {
-        $form = wp_nonce_field( $this->action, '_wpnonce', true, false );
+        $form = $this->get_nonce_field();
         $form .= wp_referer_field( false );
         $form .= '<input type="hidden" name="action" value="' . esc_attr("imagestamp_" . $this->action) . '" />';
         if($echo) {
@@ -98,6 +115,16 @@ class Action
         } else {
             return $form;
         }
+    }
+
+    /**
+     * Get the action nonce
+     * 
+     * @param string $name
+     * @return string|void
+     */
+    public function get_nonce_field(string $name = "_wpnonce") {
+        return wp_nonce_field( $this->action, $name, true, false );
     }
 
 

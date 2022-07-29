@@ -45,6 +45,11 @@ class SaveSettings extends Action
                 $opacity = $opacity_data / 100;
             }
         }
+        
+        if(isset($this->data["watermark-image"]) && wp_attachment_is_image($this->data["watermark-image"])) {
+            update_option("imagestamp_watermark_image", $this->data["watermark-image"]);
+        }
+
         update_option("imagestamp_watermark_position", $position);
         update_option("imagestamp_watermark_text", $watermark);
         update_option("imagestamp_watermark_opacity", $opacity);
